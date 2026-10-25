@@ -1,26 +1,20 @@
 {
   "name": "nusa-custom",
   "version": "1.0.0",
-  "description": "A small Nusa-inspired Windows desktop notch starter. It is an independent implementation and does not include Nusa's original application source code or branding assets.",
+  "description": "Notch overlay for Windows",
+  "author": "Shivansh Gupta",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "web": "http-server ui -p 5173 -c-1"
+    "web": "http-server ui -p 5173 -c-1",
+    "dist": "electron-builder --win --publish never"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Shivansh-04/nusa-custom.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/Shivansh-04/nusa-custom/issues"
-  },
-  "homepage": "https://github.com/Shivansh-04/nusa-custom#readme",
-  "devDependencies": {
-    "electron": "^45.0.0",
-    "http-server": "^14.1.1"
+  "build": {
+    "appId": "com.shivansh.nusacustom",
+    "productName": "NusaCustom",
+    "files": ["main.js", "preload.js", "media.js", "ui/**/*"],
+    "extraResources": [{ "from": "scripts", "to": "scripts" }],
+    "win": { "target": "nsis" },
+    "nsis": { "oneClick": true, "perMachine": false, "runAfterFinish": true }
   }
 }

@@ -6,10 +6,29 @@
   <link rel="stylesheet" href="s.css">
 </head>
 <body>
-  <div id="notch" data-open="0">
-    <div class="closed"><span id="clk">00:00</span></div>
-    <div class="open"><p>Pages go here</p></div>
+  <div id="notch" data-open="0" data-playing="0">
+    <div class="shell">
+      <div class="glow"></div>
+      <div class="closed">
+        <i class="ring" id="ring"></i>
+        <span id="clk">00:00</span>
+        <span class="eq"><i></i><i></i><i></i><i></i></span>
+      </div>
+      <div class="open">
+        <button class="nav prev" id="prev">&#8249;</button>
+        <div id="pages"></div>
+        <button class="nav next" id="next">&#8250;</button>
+        <div id="dots"></div>
+      </div>
+    </div>
   </div>
-  <script src="app.js"></script>
+
+  <script src="core.js"></script>
+  <script src="modules/music.js"></script>
+  <script src="modules/pomodoro.js"></script>
+  <script src="modules/water.js"></script>
+  <script src="modules/shelf.js"></script>
+  <script src="modules/todo.js"></script>
+  <script>Nusa.start();</script>
 </body>
 </html>
