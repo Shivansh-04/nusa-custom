@@ -17,6 +17,7 @@ A small Nusa-inspired Windows desktop notch starter. It is an independent implem
 Install Node.js 22 LTS or newer, then in this folder run:
 
 ```powershell
+*npm run web*
 npm install
 npm start
 ```

@@ -1,0 +1,19 @@
+:root { --spring: cubic-bezier(.34,1.32,.5,1); }
+html, body { margin: 0; background: transparent; overflow: hidden;
+  font-family: "Segoe UI", system-ui, sans-serif; color: #fff; user-select: none; }
+body { display: flex; justify-content: center; }
+
+#notch {
+  position: relative; width: 150px; height: 30px;
+  background: #000; border-radius: 0 0 14px 14px; overflow: hidden;
+  transition: width .6s var(--spring), height .6s var(--spring), border-radius .45s ease;
+}
+#notch[data-open="1"] { width: 420px; height: 140px; border-radius: 0 0 32px 32px; }
+
+.closed, .open { position: absolute; inset: 0; transition: opacity .25s ease; }
+.closed { display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+.open { display: grid; place-items: center; opacity: 0; pointer-events: none; }
+#notch[data-open="1"] .closed { opacity: 0; }
+#notch[data-open="1"] .open { opacity: 1; transition-delay: .2s; pointer-events: auto; }
+
+@media (prefers-reduced-motion: reduce) { #notch { transition: none; } }
