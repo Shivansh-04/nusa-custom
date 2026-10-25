@@ -1,0 +1,39 @@
+{
+  "name": "nusa-custom-starter",
+  "version": "0.1.0",
+  "description": "A Nusa-inspired expandable desktop notch built with Electron",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable",
+    "dist:installer": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "dev.customnotch.desktop",
+    "productName": "Custom Notch",
+    "asar": true,
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "styles.css",
+      "renderer.js",
+      "assets/custom-notch.png",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ]
+    }
+  }
+}
