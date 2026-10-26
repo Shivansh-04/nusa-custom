@@ -6,14 +6,22 @@
   <link rel="stylesheet" href="s.css">
 </head>
 <body>
-  <div id="notch" data-open="0" data-playing="0">
+  <div id="notch" data-s="boot" data-playing="0">
     <div class="shell">
       <div class="glow"></div>
-      <div class="closed">
-        <i class="ring" id="ring"></i>
-        <span id="clk">00:00</span>
-        <span class="eq"><i></i><i></i><i></i><i></i></span>
+
+      <div class="boot">
+        <i class="arc l"></i><i class="arc r"></i>
+        <span class="beyes"><i></i><i></i></span>
       </div>
+
+      <div class="closed">
+        <span class="live"><i class="ring" id="ring"></i><span id="clk">00:00</span></span>
+        <i class="sep"></i>
+        <span class="eyes" id="eyes"><i></i><i></i></span>
+        <i class="dot"></i>
+      </div>
+
       <div class="open">
         <button class="nav prev" id="prev">&#8249;</button>
         <div id="pages"></div>
@@ -21,8 +29,10 @@
         <div id="dots"></div>
       </div>
     </div>
+    <div class="bootlabel">Starting Notch&hellip;</div>
   </div>
 
+  <script>if (!window.nusa) document.body.style.background = 'linear-gradient(#5b6ad8, #d9788c 70%, #f0a873)';</script>
   <script src="core.js"></script>
   <script src="modules/music.js"></script>
   <script src="modules/pomodoro.js"></script>

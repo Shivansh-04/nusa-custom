@@ -1,11 +1,12 @@
 window.Nusa = (() => {
   const $ = (id) => document.getElementById(id);
   const notch = $('notch'), pagesEl = $('pages'), dotsEl = $('dots'), clk = $('clk');
+  const ring = $('ring'), eyes = $('eyes');
   const mods = [];
-  let cur = 0, open = false, over = false, holds = 0, closeT = 0, shrinkT = 0, live = null;
+  let cur = 0, state = 'boot', over = false, holds = 0, closeT = 0, shrinkT = 0;
+  let live = null, liveP = 100, battP = 70;
   const hidden = JSON.parse(localStorage.getItem('hidden') || '[]');
   const list = () => mods.filter((m) => !hidden.includes(m.id));
-
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   function register(m) {
@@ -27,39 +28,43 @@ window.Nusa = (() => {
     notch.style.setProperty('--g1', g[0]);
     notch.style.setProperty('--g2', g[1]);
     l[i].el.classList.add('on');
-    if (l[i].onShow) l[i].onShow();
+    if (state === 'open' && l[i].onShow) l[i].onShow();
     [...dotsEl.children].forEach((d, k) => d.classList.toggle('on', k === i));
   }
   const goTo = (id) => { const k = list().findIndex((m) => m.id === id); if (k >= 0) go(k); };
 
-  function setOpen(v) {
-    if (v === open) return;
-    open = v;
+  function setState(s) {
+    if (s === state) return;
+    const prev = state;
+    state = s;
     clearTimeout(shrinkT);
     const m = list()[cur];
-    if (v) {
-      if (window.nusa) window.nusa.size(true);
-      requestAnimationFrame(() => { notch.dataset.open = '1'; });
+    if (s === 'open') {
+      if (window.nusa) window.nusa.size('open');
+      requestAnimationFrame(() => { notch.dataset.s = 'open'; });
       if (m && m.onShow) m.onShow();
     } else {
-      notch.dataset.open = '0';
-      shrinkT = setTimeout(() => { if (window.nusa) window.nusa.size(false); }, 650);
-      if (m && m.onHide) m.onHide();
+      notch.dataset.s = s;
+      if (prev === 'open' && m && m.onHide) m.onHide();
+      shrinkT = setTimeout(() => { if (window.nusa) window.nusa.size(s); }, 650);
     }
   }
 
-  function enter() { over = true; clearTimeout(closeT); closeT = 0; setOpen(true); }
+  function enter() {
+    if (state === 'boot') return;
+    over = true; clearTimeout(closeT); closeT = 0; setState('open');
+  }
   function leave() {
     over = false;
     if (holds || closeT) return;
-    closeT = setTimeout(() => { closeT = 0; setOpen(false); }, 300);
+    closeT = setTimeout(() => { closeT = 0; if (state === 'open') setState('closed'); }, 300);
   }
   function hold(v) {
     holds = Math.max(0, holds + (v ? 1 : -1));
     if (!holds && !over) leave();
   }
 
-  // typing helper: makes the (normally non-focusable) window focusable while an input is used
+  // makes the (normally non-focusable) window focusable while an input is used
   function typing(inp) {
     let on = false;
     inp.addEventListener('mousedown', () => {
@@ -79,6 +84,7 @@ window.Nusa = (() => {
 
   // hover
   document.addEventListener('mousemove', (e) => {
+    if (state === 'boot') return;
     const r = notch.getBoundingClientRect();
     const inside = e.clientX >= r.left - 6 && e.clientX <= r.right + 6 && e.clientY <= r.bottom + 6;
     if (inside) enter(); else if (over) leave();
@@ -99,34 +105,53 @@ window.Nusa = (() => {
   dotsEl.addEventListener('click', (e) => { if (e.target.dataset.i != null) go(+e.target.dataset.i); });
   let wheelT = 0;
   notch.addEventListener('wheel', (e) => {
+    if (state !== 'open') return;
     const n = Date.now();
     if (n - wheelT < 350) return;
     wheelT = n;
     go(cur + (e.deltaY > 0 || e.deltaX > 0 ? 1 : -1));
   }, { passive: true });
 
-  // closed-state clock (a module can temporarily replace it, e.g. the Pomodoro countdown)
+  // closed state: clock + ring (battery by default, progress when a module sets a live value)
   function tick() {
     const d = new Date();
     clk.textContent = live || String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   }
-  const setLive = (t) => { live = t; tick(); };
+  function paint() {
+    ring.classList.toggle('act', !!live);
+    ring.style.setProperty('--p', (live ? liveP : battP) + '%');
+  }
+  const setLive = (t, pct) => {
+    live = t;
+    liveP = pct == null ? 100 : Math.max(0, Math.min(100, pct));
+    tick(); paint();
+  };
   const setPlaying = (v) => { notch.dataset.playing = v ? '1' : '0'; };
 
-  const ringEl = $('ring');
-if (navigator.getBattery) {
-  navigator.getBattery().then((b) => {
-    const u = () => ringEl.style.setProperty('--p', Math.round(b.level * 100) + '%');
-    u(); b.addEventListener('levelchange', u);
-  }).catch(() => {});
-}
+  if (navigator.getBattery) {
+    navigator.getBattery().then((b) => {
+      const u = () => { battP = Math.round(b.level * 100); paint(); };
+      u(); b.addEventListener('levelchange', u);
+    }).catch(() => {});
+  }
+
+  // eyes blink on a timer (no CSS animation, so nothing runs between blinks)
+  function blink() {
+    if (state === 'closed') {
+      eyes.classList.add('b');
+      setTimeout(() => eyes.classList.remove('b'), 140);
+    }
+    setTimeout(blink, 3500 + Math.random() * 3500);
+  }
 
   function start() {
     dotsEl.innerHTML = list().map((_, i) => '<i data-i="' + i + '"></i>').join('');
     go(0);
-    tick();
+    tick(); paint();
     setInterval(tick, 15000);
+    setTimeout(blink, 4000);
+    setTimeout(() => setState('closed'), 2600);   // length of the startup screen
   }
 
-  return { register, start, go, goTo, hold, typing, leave, setLive, setPlaying, esc, isOpen: () => open };
+  return { register, start, go, goTo, hold, typing, leave, setLive, setPlaying, esc, isOpen: () => state === 'open' };
 })();

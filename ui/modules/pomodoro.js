@@ -33,7 +33,7 @@ Nusa.register({
       $('#pm').textContent = mode === 'focus' ? 'Focus time' : 'Short break';
       $('#pg').textContent = timer ? 'Pause' : 'Start';
       $('#ps').textContent = mode === 'focus' ? 'Break' : 'Focus';
-      Nusa.setLive(timer ? fmt(left) : null);
+      Nusa.setLive(timer ? fmt(left) : null, (left / LEN[mode]) * 100);
     }
     function stop() { clearInterval(timer); timer = 0; }
     function tick() {

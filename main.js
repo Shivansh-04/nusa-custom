@@ -5,8 +5,9 @@ const media = require('./media');
 
 if (!app.requestSingleInstanceLock()) app.quit();
 
-const SIZES = { closed: { w: 180, h: 38 }, open: { w: 480, h: 172 } };
-let win, state = 'closed';
+const SIZES = { boot: { w: 360, h: 170 }, closed: { w: 270, h: 52 }, open: { w: 480, h: 172 } };
+let win, state = 'boot';
+// let win, state = 'closed';
 const icons = new Map();
 
 function place(s) {
@@ -18,7 +19,7 @@ function place(s) {
 }
 
 function create() {
-  const { w, h } = SIZES.closed;
+  const { w, h } = SIZES.boot;
   win = new BrowserWindow({
     width: w, height: h, show: false,
     frame: false, transparent: true, resizable: false, movable: false,
@@ -29,13 +30,13 @@ function create() {
     }
   });
   win.setAlwaysOnTop(true, 'screen-saver');
-  place('closed');
+  place('boot');
   win.loadFile('ui/index.html');
   win.once('ready-to-show', () => win.showInactive());
   media.start((s) => win.webContents.send('media', s));
 }
 
-ipcMain.on('size', (_e, open) => place(open ? 'open' : 'closed'));
+ipcMain.on('size', (_e, s) => place(SIZES[s] ? s : 'closed'));
 ipcMain.on('focusable', (_e, v) => {
   if (!win) return;
   win.setFocusable(v);
